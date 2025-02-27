@@ -3,7 +3,7 @@ const lyricsContainer = document.getElementById("lyrics");
 
 // Lyrics with timing converted from YouTube timestamps
 const lyrics = [
-    { time: 0, text: "Mountain River Starlight", pinyin: "" },
+    { time: 0, text: "山河星光 Starlight Of Mountains And Rivers ", pinyin: "" },
     { time: 10, text: "云海万里放飞远行的白鸽", pinyin: "Yún hǎi wàn lǐ fàng fēi yuǎn xíng de bái gē" },
     { time: 15, text: "朝阳在瞳孔里染出一抹红", pinyin: "Cháo yáng zài tóng kǒng lǐ rǎn chū yī mǒ hóng" },
     { time: 20, text: "微风收集满街花香的欢歌", pinyin: "Wēi fēng shōu jí mǎn jiē huā xiāng de huān gē" },
