@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chuc mung ngay 8/3</title>
     <link type="text/css" rel="stylesheet" href="./asset/style.css">
     <script type="text/javascript" src="./asset/jquery.min.js"></script>
@@ -15,68 +15,72 @@
     <script type="text/javascript" src="./asset/functions.js" charset="utf-8"></script>
     <script type="text/javascript" src="./asset/love.js" charset="utf-8"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         @media screen and (orientation: portrait) {
-            body {
+            .rotate-notice {
                 display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                background-color: #f0f0f0;
-                font-family: Arial, sans-serif;
             }
-
             #main {
                 display: none;
-            }
-
-            .portrait-warning {
-                display: block;
-                text-align: center;
-                color: red;
-                font-size: 24px;
             }
         }
-
+        
         @media screen and (orientation: landscape) {
-            .portrait-warning {
+            .rotate-notice {
                 display: none;
             }
-
             #main {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                width: 100vw;
-                height: 100vh;
-                overflow: hidden;
+                display: block;
             }
-
-            canvas {
-                width: 100%;
-                height: 100%;
-            }
+        }
+        
+        .rotate-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffe;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 24px;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+        
+        .rotate-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            animation: rotate 1.5s infinite ease-in-out;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(90deg); }
+            75% { transform: rotate(90deg); }
+            100% { transform: rotate(0deg); }
         }
     </style>
 </head>
 
 <body>
-    <div class="portrait-warning">Vui lòng xoay ngang thiết bị để tiếp tục!</div>
+    <div class="rotate-notice">
+        <div class="rotate-icon">📱↔️</div>
+        <p>Vui lòng xoay điện thoại sang ngang để xem tốt nhất</p>
+    </div>
+
     <div id="main">
         <div id="wrap">
-            <div id="text" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+            <div id="text" style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;">
                 <div id="code">
                     <font color="#000"><span class="say">Chúc mừng 8/3 đến những bông hoa rực rỡ đã làm bạn với tớ những năm tháng quaaaa!!</span><br>
                         <span class="say"> </span><br>
                         <span class="say">Dù cậu là ai, đang ở đâu. Mới quen hay là bạn học cũ nè, tớ đều nhớ tới các cậu và gửi các cậu bức thư siêu siêu cute này.</span><br>
-                        <span class="say">8/3 eiu vui ve nhaa.</span><br>
-                        <span class="say">Chúc cậu ngày 8/3 thật vui vẻ và tràn đầy sự xinh đẹp cùng với nhiều yêu thương.</span><br>
+                        <span class="say">Nhân ngày 8/3 này, tớ xin chúc cậu mãi xinh đẹp, đáng yêu, luôn hạnh phúc. Chúc cậu luôn gặp may mắn trong cuộc sống và vui vẻ mọi lúc mọi nơi. Nụ cười của cậu còn sáng hơn ánh mặt trời đấyyyyyy.</span><br>
+                        <span class="say">Chúc cậu ngày 8/3 thật vui vẻ và tràn đầy sự xinh đẹp cùng với nhiều yêu thương. </span><br>
                         <span class="say"><span class="space"><img width="100px" height="100px" src="image/tym.png" alt=""><br>
                         <span class="say"><span class="space"></span> --Your friend-- </span>
                     </font>
@@ -93,5 +97,22 @@
 
 </body>
 <script src="./asset/script.js"></script>
+<script>
+    // Điều chỉnh kích thước cho phù hợp với khung hình
+    function resizeContent() {
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+        var ratio = Math.min(windowWidth / 1100, windowHeight / 680);
+        
+        document.getElementById('wrap').style.transform = 'scale(' + ratio + ')';
+        document.getElementById('wrap').style.transformOrigin = 'top left';
+        document.getElementById('main').style.height = (680 * ratio) + 'px';
+        document.getElementById('main').style.width = (1100 * ratio) + 'px';
+        document.getElementById('main').style.overflow = 'hidden';
+    }
 
+    // Kích hoạt điều chỉnh kích thước khi tải trang và khi thay đổi kích thước cửa sổ
+    window.onload = resizeContent;
+    window.onresize = resizeContent;
+</script>
 </html>
