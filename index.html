@@ -15,6 +15,7 @@
     <script type="text/javascript" src="./asset/functions.js" charset="utf-8"></script>
     <script type="text/javascript" src="./asset/love.js" charset="utf-8"></script>
     <style>
+        /* CSS cho chế độ xoay ngang */
         @media screen and (orientation: portrait) {
             .rotate-notice {
                 display: flex;
@@ -63,6 +64,72 @@
             75% { transform: rotate(90deg); }
             100% { transform: rotate(0deg); }
         }
+        
+        /* Mobile-friendly styles */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #ffe;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #231f20;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+        }
+        
+        #main {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        #wrap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            max-width: 1100px;
+            max-height: 680px;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #text {
+            position: absolute;
+            width: 35%;
+            height: auto;
+            left: 5%;
+            top: 12%;
+            z-index: 100;
+        }
+        
+        #code {
+            display: none;
+            font-size: 16px;
+        }
+        
+        .say {
+            margin-left: 5px;
+            font-size: 0.9em;
+            line-height: 1.3em;
+        }
+        
+        .space {
+            margin-right: 15%;
+        }
     </style>
 </head>
 
@@ -87,32 +154,106 @@
                     </p>
                 </div>
             </div>
-            <canvas id="canvas" width="1100" height="680"></canvas>
+            <canvas id="canvas"></canvas>
         </div>
     </div>
 
-    <audio id="myAudio" autoplay="autoplay">
+    <audio id="myAudio">
         <source src="music/nhac.mp3" type="audio/mp3" />
     </audio>
 
 </body>
 <script src="./asset/script.js"></script>
 <script>
-    // Điều chỉnh kích thước cho phù hợp với khung hình
-    function resizeContent() {
-        var windowWidth = window.innerWidth;
-        var windowHeight = window.innerHeight;
-        var ratio = Math.min(windowWidth / 1100, windowHeight / 680);
+    // Làm cho website responsive và hỗ trợ touch
+    (function() {
+        // Bổ sung xử lý sự kiện touch cho mobile
+        var audioElement = document.getElementById("myAudio");
         
-        document.getElementById('wrap').style.transform = 'scale(' + ratio + ')';
-        document.getElementById('wrap').style.transformOrigin = 'top left';
-        document.getElementById('main').style.height = (680 * ratio) + 'px';
-        document.getElementById('main').style.width = (1100 * ratio) + 'px';
-        document.getElementById('main').style.overflow = 'hidden';
-    }
-
-    // Kích hoạt điều chỉnh kích thước khi tải trang và khi thay đổi kích thước cửa sổ
-    window.onload = resizeContent;
-    window.onresize = resizeContent;
+        // Đảm bảo audio chỉ chạy sau khi user tương tác
+        function playAudio() {
+            audioElement.play().catch(function(error) {
+                console.log("Audio play failed: ", error);
+            });
+        }
+        
+        // Thêm các sự kiện touch
+        document.addEventListener("touchstart", playAudio);
+        document.addEventListener("click", playAudio);
+        
+        // Điều chỉnh kích thước canvas và sự kiện
+        function resizeCanvas() {
+            var canvas = document.getElementById("canvas");
+            var wrap = document.getElementById("wrap");
+            
+            // Lấy kích thước của container
+            var containerWidth = wrap.clientWidth;
+            var containerHeight = wrap.clientHeight;
+            
+            // Đặt kích thước canvas
+            canvas.width = containerWidth;
+            canvas.height = containerHeight;
+            
+            // Thông báo cho script về thay đổi kích thước
+            if (typeof window.canvasResized === 'function') {
+                window.canvasResized(containerWidth, containerHeight);
+            }
+        }
+        
+        // Chuyển đổi sự kiện mouse thành touch
+        function setupTouchEvents() {
+            var canvas = document.getElementById("canvas");
+            
+            canvas.addEventListener("touchstart", function(e) {
+                if (e.touches.length > 0) {
+                    var touch = e.touches[0];
+                    var mouseEvent = new MouseEvent("click", {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    canvas.dispatchEvent(mouseEvent);
+                }
+                e.preventDefault();
+            });
+            
+            canvas.addEventListener("touchmove", function(e) {
+                if (e.touches.length > 0) {
+                    var touch = e.touches[0];
+                    var mouseEvent = new MouseEvent("mousemove", {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    canvas.dispatchEvent(mouseEvent);
+                }
+                e.preventDefault();
+            });
+        }
+        
+        // Kiểm tra nếu là thiết bị di động
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Khởi tạo khi trang được tải
+        window.addEventListener("load", function() {
+            resizeCanvas();
+            setupTouchEvents();
+            
+            // Kiểm tra xoay màn hình
+            window.addEventListener("resize", function() {
+                resizeCanvas();
+            });
+            
+            window.addEventListener("orientationchange", function() {
+                setTimeout(resizeCanvas, 300); // Đợi một chút để màn hình hoàn tất việc xoay
+            });
+            
+            // Bật audio tự động sau khi tải trang hoàn tất 
+            // (Lưu ý: Nhiều trình duyệt mobile yêu cầu tương tác người dùng)
+            if (!isMobile()) {
+                playAudio();
+            }
+        });
+    })();
 </script>
 </html>
