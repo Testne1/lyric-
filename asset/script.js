@@ -6,10 +6,44 @@
     return false;
   }
 
-  var width = canvas.width();
-  var height = canvas.height();
-  canvas.attr("width", width);
-  canvas.attr("height", height);
+  // Biến toàn cục để lưu trữ tỷ lệ
+  var scaleRatio = 1;
+  
+  // Cập nhật kích thước canvas
+  function updateCanvasSize() {
+    var width = canvas.parent().width();
+    var height = canvas.parent().height();
+    
+    // Tính toán tỷ lệ so với kích thước gốc
+    scaleRatio = Math.min(width / 1100, height / 680);
+    
+    // Cập nhật kích thước thực tế
+    canvas.attr("width", width);
+    canvas.attr("height", height);
+    
+    return {
+      width: width,
+      height: height
+    };
+  }
+  
+  // Khởi tạo kích thước
+  var dimensions = updateCanvasSize();
+  var width = dimensions.width;
+  var height = dimensions.height;
+  
+  // Hàm được gọi từ bên ngoài khi cần điều chỉnh kích thước
+  window.canvasResized = function(newWidth, newHeight) {
+    width = newWidth;
+    height = newHeight;
+    scaleRatio = Math.min(width / 1100, height / 680);
+    
+    // Vẽ lại cây và các yếu tố khác nếu cần
+    if (tree) {
+      tree.resize(width, height, scaleRatio);
+    }
+  };
+  
   var opts = {
     seed: {
       x: width / 2 - 20,
@@ -40,146 +74,26 @@
     ],
     bloom: {
       num: 700,
-      width: 1080,
-      height: 650,
+      width: width,
+      height: height,
     },
     footer: {
-      width: 1200,
+      width: width,
       height: 5,
       speed: 10,
     },
   };
 
-  var tree = new Tree(canvas[0], width, height, opts);
-  var seed = tree.seed;
-  var foot = tree.footer;
-  var hold = 1;
-
-  canvas
-    .click(function (e) {
-      var offset = canvas.offset(),
-        x,
-        y;
-      x = e.pageX - offset.left;
-      y = e.pageY - offset.top;
-      if (seed.hover(x, y)) {
-        hold = 0;
-        canvas.unbind("click");
-        canvas.unbind("mousemove");
-        canvas.removeClass("hand");
-      }
-    })
-    .mousemove(function (e) {
-      var offset = canvas.offset(),
-        x,
-        y;
-      x = e.pageX - offset.left;
-      y = e.pageY - offset.top;
-      canvas.toggleClass("hand", seed.hover(x, y));
-    });
-
-  var seedAnimate = eval(
-    Jscex.compile("async", function () {
-      seed.draw();
-      while (hold) {
-        $await(Jscex.Async.sleep(10));
-      }
-      while (seed.canScale()) {
-        seed.scale(0.95);
-        $await(Jscex.Async.sleep(10));
-      }
-      while (seed.canMove()) {
-        seed.move(0, 2);
-        foot.draw();
-        $await(Jscex.Async.sleep(10));
-      }
-    })
-  );
-
-  var growAnimate = eval(
-    Jscex.compile("async", function () {
-      do {
-        tree.grow();
-        $await(Jscex.Async.sleep(10));
-      } while (tree.canGrow());
-    })
-  );
-
-  var flowAnimate = eval(
-    Jscex.compile("async", function () {
-      do {
-        tree.flower(2);
-        $await(Jscex.Async.sleep(10));
-      } while (tree.canFlower());
-    })
-  );
-
-  var moveAnimate = eval(
-    Jscex.compile("async", function () {
-      tree.snapshot("p1", 240, 0, 610, 680);
-      while (tree.move("p1", 500, 0)) {
-        foot.draw();
-        $await(Jscex.Async.sleep(10));
-      }
-      foot.draw();
-      tree.snapshot("p2", 500, 0, 610, 680);
-
-      canvas
-        .parent()
-        .css("background", "url(" + tree.toDataURL("image/png") + ")");
-      canvas.css("background", "#ffe");
-      $await(Jscex.Async.sleep(300));
-      canvas.css("background", "none");
-    })
-  );
-
-  var jumpAnimate = eval(
-    Jscex.compile("async", function () {
-      var ctx = tree.ctx;
-      while (true) {
-        tree.ctx.clearRect(0, 0, width, height);
-        tree.jump();
-        foot.draw();
-        $await(Jscex.Async.sleep(25));
-      }
-    })
-  );
-
-  var textAnimate = eval(
-    Jscex.compile("async", function () {
-      // var together = new Date();
-      // together.setFullYear(2024,10 , 18);
-      // together.setHours(0);
-      // together.setMinutes(0);
-      // together.setSeconds(0);
-      // together.setMilliseconds(0);
-
-      $("#code").show().typewriter();
-      $("#clock-box").fadeIn(500);
-      while (true) {
-        timeElapse(together);
-        $await(Jscex.Async.sleep(1000));
-      }
-    })
-  );
-
-  var runAsync = eval(
-    Jscex.compile("async", function () {
-      $await(seedAnimate());
-      $await(growAnimate());
-      $await(flowAnimate());
-      $await(moveAnimate());
-
-      textAnimate().start();
-
-      $await(jumpAnimate());
-    })
-  );
-
-  runAsync().start();
-})();
-
-document.addEventListener("click", function() {
-    var audio = document.getElementById("myAudio");
-    audio.play();
-});
+  // Sửa lại lớp Tree để hỗ trợ responsive
+  function Tree(canvas, width, height, opts) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.width = width;
+    this.height = height;
+    this.opts = opts;
+    this.scaleRatio = scaleRatio;
+    
+    this.seed = new Seed(this.opts.seed);
+    this.footer = new Footer(this.opts.footer);
+    
+    this.branches
